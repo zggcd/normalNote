@@ -69,7 +69,7 @@ namespace Taiyi
             mInitFinished = false;
             InitRecentServerData();
             // 直连测试
-            AddInitServerList(1, "Test", "47.101.184.123", 20005);
+            AddInitServerList(1, "Test", "47.101.184.123", 20006);
 
             //UniCore.WWWDownloader.Get().DownloadAndCacheText("serverlist.txt", InitServerList);
             EventDispatcher.Inst.AddListener(HumanInfoEvent.HumanInfoChange, OnHumanInfoChange);

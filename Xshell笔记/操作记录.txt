@@ -878,59 +878,18 @@ tail 不小心进入某种模式：退出：ctrl+c
   952  cd data
   953  ll
   954  cd /qzdata1/server/ty_s3
-  955  sh closeServer3.sh 
-  956  sh genDB.sh 
-  957  sh crossGenDB.sh 
-  958  sh startServer3.sh 
+
   959  tailf log4j2/world0/world0.log
-  960  sh closeServer3.sh 
-  961  sh genDB.sh 
-  962  sh crossGenDB.sh 
-  963  sh startServer3.sh 
+
   964  tailf log4j2/world0/world0.log
   965  tailf log4j2/db/db.log 
-  966  sh closeServer3.sh 
-  967  sh startServer3.sh 
-  968  cat log4j2/world0/world0.log|grep ".jar"
-  969  sh closeServer3.sh 
-  970  sh startServer3.sh 
-  971  sh closeServer3.sh 
-  972  sh startServer3.sh 
-  973  sh closeServer3.sh 
-  974  sh startServer3.sh 
-  975  sh closeServer3.sh 
-  976  sh startServer3.sh 
+
   977  cat log4j2/world0/world0.log | grep "Exception"
   978  cat log4j2/world0/world0.log | grep -C 5  "Exception"
-  979  sh closeServer3.sh 
-  980  sh genDB.sh 
-  981  sh crossGenDB.sh 
-  982  sh startServer3.sh 
-  983  sh closeServer3.sh 
-  984  sh startServer3.sh 
-  985  sh closeServer3.sh 
-  986  sh genDB.sh 
-  987  sh crossGenDB.sh 
-  988  sh startServer3.sh 
-  989  cd /qzdata1/server/ty_s3
-  990  ll
-  991  sh closeServer3.sh 
-  992  sh genDB.sh 
-  993  sh crossGenDB.sh 
-  994  sh startServer3.sh 
+
   995  io
   996  ip
   997  port
-  998  cd /qzdata1/server/ty_s3/
-  999  ll
- 1000  sh closeServer3.sh 
- 1001  sh genDB.sh 
- 1002  sh crossGenDB.sh
- 1003  sh startServer3.sh
- 1004  sh closeServer3.sh
- 1005  sh closeServer3
- 1006  sh startServer3.sh 
- 1007  sh closeServer3
  1008  sh srvDB3.sh 
  1009  cat ty_game
  1010  sh ty_game
@@ -946,19 +905,7 @@ tail 不小心进入某种模式：退出：ctrl+c
  1020  pa aux
  1021  ps -A
  1022  ll
- 1023  ls
- 1024  ll
- 1025  cd sh
- 1026  ll
- 1027  ls
- 1028  sh closeServer.sh 
- 1029  sh startServer.sh 
- 1030  cd .
- 1031  ll
- 1032  cd ..
- 1033  ll
- 1034  cd ..
- 1035  ll
+
  1036  cd ty_s3
  1037  ll
  1038  sh startServer3.sh
@@ -970,14 +917,6 @@ tail 不小心进入某种模式：退出：ctrl+c
  1044  kill -9  23770
  1045  kill -9   23771
  1046  ps aux  | grep ty_s3
- 1047  ls
- 1048  sh ty_game
- 1049  sh ty_game restart
- 1050  sh ty_game
- 1051  sh ty_game  23770
- 1052  sh ty_game  genDB
- 1053  sh ty_game genDB
- 1054  sh ty_game status
  1055  cd ..
  1056  ls
  1057  ps aux 
@@ -988,18 +927,6 @@ tail 不小心进入某种模式：退出：ctrl+c
  1062  cat genDB
  1063  cat ty_game.conf 
  1064  ls
- 1065  cd libs/
- 1066  ls
- 1067  cd ..
- 1068  ls
- 1069  cd config/
- 1070  ls
- 1071  cat genDB
- 1072  cat config.properties 
- 1073  ls
- 1074  cd ..
- 1075  ls
- 1076  sh ty_game
  1077  history
  
  -- 日记

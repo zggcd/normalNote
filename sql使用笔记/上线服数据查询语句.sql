@@ -655,3 +655,289 @@ SELECT CURRENT_TIMESTAMP(3);
 SELECT CURRENT_TIMESTAMP(6);
 SELECT REPLACE(UNIX_TIMESTAMP(CURRENT_TIMESTAMP(3)), '.', '');-- 获取当前机器时间毫秒
 SELECT REPLACE(UNIX_TIMESTAMP(CURRENT_TIMESTAMP(6)), '.', '');-- 获取当前机器时间微秒
+
+
+-- -------------------------------------------------------合服bug修改
+-- 检测
+SELECT * FROM activity_humandata WHERE activity_humandata.humanid = "100070000016000009";
+SELECT * FROM instance WHERE instance.`id` = "100070000016000009";
+SELECT * FROM backlog WHERE backlog.humanid = "100070000016000009";
+SELECT * FROM fengmo WHERE fengmo.id = "100070000016000009";
+SELECT * FROM friend WHERE friend.id = "100070000016000009";
+SELECT * FROM general WHERE general.humanid = "100070000016000009";
+SELECT * FROM human_ext WHERE human_ext.id = "100070000016000009";
+SELECT * FROM human_ext2 WHERE human_ext2.id = "100070000016000009";
+SELECT * FROM mail WHERE mail.receiver = "100070000016000009";
+SELECT * FROM quest WHERE quest.id = "100070000016000009";
+SELECT * FROM rep_special WHERE rep_special.id = "100070000016000009";
+SELECT * FROM rep_turn_around WHERE rep_turn_around.humanid = "100070000016000009";
+SELECT * FROM shopexchange WHERE shopexchange.id = "100070000016000009";
+SELECT * FROM tower WHERE tower.id = "100070000016000009";
+
+
+
+-- 查询数量
+SELECT COUNT(1) FROM human; -- 2571  830
+SELECT COUNT(1) FROM lastId; --  221
+SELECT COUNT(1) FROM humancopy; -- 1490
+SELECT COUNT(1) FROM activity_humandata; -- 30521
+SELECT COUNT(1) FROM copy_activity_humandata; -- 43797
+SELECT * FROM lastId; --  221
+
+-- 开始。。。。。修改 合服bug
+-- 
+-- 
+CREATE TABLE  humancopy LIKE human;
+CREATE TABLE `maxId` (`id` BIGINT(20) NOT NULL, PRIMARY KEY (`id`)) ENGINE=INNODB DEFAULT CHARSET=utf8;
+CREATE TABLE `lastId` (`id` BIGINT(20) NOT NULL, PRIMARY KEY (`id`)) ENGINE=INNODB DEFAULT CHARSET=utf8;
+CREATE TABLE `repeatIds` (  `id` BIGINT(20) NOT NULL, `level` INT(11) NOT NULL, `Account` VARCHAR(64) NOT NULL,`Name` VARCHAR(32) NOT NULL, PRIMARY KEY (`id`)) ENGINE=INNODB DEFAULT CHARSET=utf8;
+CREATE TABLE  copy_activity_humandata LIKE activity_humandata;
+CREATE TABLE  copy_instance LIKE instance;
+CREATE TABLE  copy_backlog LIKE backlog;
+CREATE TABLE  copy_fengmo LIKE fengmo;
+CREATE TABLE  copy_friend LIKE friend;
+CREATE TABLE  copy_general LIKE general ;
+CREATE TABLE  copy_human_ext LIKE human_ext;
+CREATE TABLE  copy_human_ext2 LIKE human_ext2;
+CREATE TABLE  copy_mail LIKE mail;
+CREATE TABLE  copy_quest LIKE quest;
+CREATE TABLE  copy_rep_special LIKE rep_special;
+CREATE TABLE  copy_rep_turn_around LIKE rep_turn_around;
+CREATE TABLE  copy_shopexchange LIKE shopexchange;
+CREATE TABLE  copy_tower LIKE tower ;
+
+-- 插入所有的角色信息 
+INSERT INTO humancopy SELECT * FROM `ty_ios8game`.`human`;
+INSERT INTO humancopy SELECT * FROM `ty_ios9game`.`human`;
+INSERT INTO humancopy SELECT * FROM `ty_ios10game`.`human`;
+INSERT INTO humancopy SELECT * FROM `ty_ios11game`.`human`;
+INSERT INTO humancopy SELECT * FROM `ty_ios12game`.`human`;
+
+
+INSERT INTO repeatIds (id,LEVEL,Account,NAME) SELECT id,LEVEL,Account,NAME FROM humancopy WHERE account IN (SELECT account FROM humancopy GROUP BY account HAVING COUNT(1)>1);
+INSERT INTO maxId SELECT MAX(CAST(CONCAT(LEVEL,SUBSTRING(id, 1,5),SUBSTRING(id, -9)) AS SIGNED)) FROM repeatIds GROUP BY account HAVING COUNT(1)>1;
+-- 得到要插入的id
+INSERT INTO lastId (SELECT id FROM repeatIds WHERE CAST(CONCAT(LEVEL,SUBSTRING(id, 1,5),SUBSTRING(id, -9)) AS SIGNED) IN (SELECT id FROM maxId));
+
+-- 插入重复的数据 `ty_ios13game`
+INSERT INTO copy_activity_humandata SELECT * FROM `ty_ios8game`.`activity_humandata`;
+INSERT INTO copy_activity_humandata SELECT * FROM `ty_ios9game`.`activity_humandata`;
+INSERT INTO copy_activity_humandata SELECT * FROM `ty_ios10game`.`activity_humandata`;
+INSERT INTO copy_activity_humandata SELECT * FROM `ty_ios11game`.`activity_humandata`;
+INSERT INTO copy_activity_humandata SELECT * FROM `ty_ios12game`.`activity_humandata`;
+
+INSERT INTO copy_instance SELECT * FROM `ty_ios8game`.`instance`;
+INSERT INTO copy_instance SELECT * FROM `ty_ios9game`.`instance`;
+INSERT INTO copy_instance SELECT * FROM `ty_ios10game`.`instance`;
+INSERT INTO copy_instance SELECT * FROM `ty_ios11game`.`instance`;
+INSERT INTO copy_instance SELECT * FROM `ty_ios12game`.`instance`;
+
+INSERT INTO copy_backlog SELECT * FROM `ty_ios8game`.`backlog`;
+INSERT INTO copy_backlog SELECT * FROM `ty_ios9game`.`backlog`;
+INSERT INTO copy_backlog SELECT * FROM `ty_ios10game`.`backlog`;
+INSERT INTO copy_backlog SELECT * FROM `ty_ios11game`.`backlog`;
+INSERT INTO copy_backlog SELECT * FROM `ty_ios12game`.`backlog`;
+
+INSERT INTO copy_fengmo SELECT * FROM `ty_ios8game`.`fengmo`;
+INSERT INTO copy_fengmo SELECT * FROM `ty_ios9game`.`fengmo`;
+INSERT INTO copy_fengmo SELECT * FROM `ty_ios10game`.`fengmo`;
+INSERT INTO copy_fengmo SELECT * FROM `ty_ios11game`.`fengmo`;
+INSERT INTO copy_fengmo SELECT * FROM `ty_ios12game`.`fengmo`;
+
+INSERT INTO copy_friend SELECT * FROM `ty_ios8game`.`friend`;
+INSERT INTO copy_friend SELECT * FROM `ty_ios9game`.`friend`;
+INSERT INTO copy_friend SELECT * FROM `ty_ios10game`.`friend`;
+INSERT INTO copy_friend SELECT * FROM `ty_ios11game`.`friend`;
+INSERT INTO copy_friend SELECT * FROM `ty_ios12game`.`friend`;
+
+INSERT INTO copy_general SELECT * FROM `ty_ios8game`.`general`;
+INSERT INTO copy_general SELECT * FROM `ty_ios9game`.`general`;
+INSERT INTO copy_general SELECT * FROM `ty_ios10game`.`general`;
+INSERT INTO copy_general SELECT * FROM `ty_ios11game`.`general`;
+INSERT INTO copy_general SELECT * FROM `ty_ios12game`.`general`;
+
+INSERT INTO copy_human_ext SELECT * FROM `ty_ios8game`.`human_ext`;
+INSERT INTO copy_human_ext SELECT * FROM `ty_ios9game`.`human_ext`;
+INSERT INTO copy_human_ext SELECT * FROM `ty_ios10game`.`human_ext`;
+INSERT INTO copy_human_ext SELECT * FROM `ty_ios11game`.`human_ext`;
+INSERT INTO copy_human_ext SELECT * FROM `ty_ios12game`.`human_ext`;
+
+INSERT INTO copy_human_ext2 SELECT * FROM `ty_ios8game`.`human_ext2`;
+INSERT INTO copy_human_ext2 SELECT * FROM `ty_ios9game`.`human_ext2`;
+INSERT INTO copy_human_ext2 SELECT * FROM `ty_ios10game`.`human_ext2`;
+INSERT INTO copy_human_ext2 SELECT * FROM `ty_ios11game`.`human_ext2`;
+INSERT INTO copy_human_ext2 SELECT * FROM `ty_ios12game`.`human_ext2`;
+
+INSERT INTO copy_mail SELECT * FROM `ty_ios8game`.`mail`;
+INSERT INTO copy_mail SELECT * FROM `ty_ios9game`.`mail`;
+INSERT INTO copy_mail SELECT * FROM `ty_ios10game`.`mail`;
+INSERT INTO copy_mail SELECT * FROM `ty_ios11game`.`mail`;
+INSERT INTO copy_mail SELECT * FROM `ty_ios12game`.`mail`;
+
+INSERT INTO copy_quest SELECT * FROM `ty_ios8game`.`quest`;
+INSERT INTO copy_quest SELECT * FROM `ty_ios9game`.`quest`;
+INSERT INTO copy_quest SELECT * FROM `ty_ios10game`.`quest`;
+INSERT INTO copy_quest SELECT * FROM `ty_ios11game`.`quest`;
+INSERT INTO copy_quest SELECT * FROM `ty_ios12game`.`quest`;
+
+INSERT INTO copy_rep_special SELECT * FROM `ty_ios8game`.`rep_special`;
+INSERT INTO copy_rep_special SELECT * FROM `ty_ios9game`.`rep_special`;
+INSERT INTO copy_rep_special SELECT * FROM `ty_ios10game`.`rep_special`;
+INSERT INTO copy_rep_special SELECT * FROM `ty_ios11game`.`rep_special`;
+INSERT INTO copy_rep_special SELECT * FROM `ty_ios12game`.`rep_special`;
+
+INSERT INTO copy_rep_turn_around SELECT * FROM `ty_ios8game`.`rep_turn_around`;
+INSERT INTO copy_rep_turn_around SELECT * FROM `ty_ios9game`.`rep_turn_around`;
+INSERT INTO copy_rep_turn_around SELECT * FROM `ty_ios10game`.`rep_turn_around`;
+INSERT INTO copy_rep_turn_around SELECT * FROM `ty_ios11game`.`rep_turn_around`;
+INSERT INTO copy_rep_turn_around SELECT * FROM `ty_ios12game`.`rep_turn_around`;
+
+INSERT INTO copy_shopexchange SELECT * FROM `ty_ios8game`.`shopexchange`;
+INSERT INTO copy_shopexchange SELECT * FROM `ty_ios9game`.`shopexchange`;
+INSERT INTO copy_shopexchange SELECT * FROM `ty_ios10game`.`shopexchange`;
+INSERT INTO copy_shopexchange SELECT * FROM `ty_ios11game`.`shopexchange`;
+INSERT INTO copy_shopexchange SELECT * FROM `ty_ios12game`.`shopexchange`;
+
+INSERT INTO copy_tower SELECT * FROM `ty_ios8game`.`tower`;
+INSERT INTO copy_tower SELECT * FROM `ty_ios9game`.`tower`;
+INSERT INTO copy_tower SELECT * FROM `ty_ios10game`.`tower`;
+INSERT INTO copy_tower SELECT * FROM `ty_ios11game`.`tower`;
+INSERT INTO copy_tower SELECT * FROM `ty_ios12game`.`tower`;
+
+
+
+
+-- 最终插入漏掉的数据
+
+INSERT INTO activity_humandata (SELECT * FROM copy_activity_humandata WHERE copy_activity_humandata.`humanid` IN (SELECT id FROM lastId));
+INSERT INTO instance (SELECT * FROM copy_instance WHERE copy_instance.`humanid` IN (SELECT id FROM lastId));
+INSERT INTO backlog (SELECT * FROM copy_backlog WHERE copy_backlog.`humanid` IN (SELECT id FROM lastId));
+INSERT INTO fengmo (SELECT * FROM copy_fengmo WHERE copy_fengmo.`id` IN (SELECT id FROM lastId));
+INSERT INTO friend (SELECT * FROM copy_friend WHERE copy_friend.`id` IN (SELECT id FROM lastId));
+INSERT INTO general (SELECT * FROM copy_general WHERE copy_general.`humanid` IN (SELECT id FROM lastId));
+INSERT INTO human_ext (SELECT * FROM copy_human_ext WHERE copy_human_ext.`id` IN (SELECT id FROM lastId));
+INSERT INTO human_ext2 (SELECT * FROM copy_human_ext2 WHERE copy_human_ext2.`id` IN (SELECT id FROM lastId));
+INSERT INTO mail (SELECT * FROM copy_mail WHERE copy_mail.`receiver` IN (SELECT id FROM lastId));
+INSERT INTO quest (SELECT * FROM copy_quest WHERE copy_quest.`id` IN (SELECT id FROM lastId));
+INSERT INTO rep_special (SELECT * FROM copy_rep_special WHERE copy_rep_special.`id` IN (SELECT id FROM lastId));
+INSERT INTO rep_turn_around (SELECT * FROM copy_rep_turn_around WHERE copy_rep_turn_around.`humanid` IN (SELECT id FROM lastId));
+INSERT INTO shopexchange (SELECT * FROM copy_shopexchange WHERE copy_shopexchange.`id` IN (SELECT id FROM lastId));
+INSERT INTO tower (SELECT * FROM copy_tower WHERE copy_tower.`id` IN (SELECT id FROM lastId));
+
+
+-- 删除表格
+DROP TABLE IF EXISTS humancopy;
+DROP TABLE IF EXISTS maxId;
+DROP TABLE IF EXISTS lastId;
+DROP TABLE IF EXISTS repeatIds;
+DROP TABLE IF EXISTS copy_activity_humandata ;
+DROP TABLE IF EXISTS copy_instance;
+DROP TABLE IF EXISTS copy_backlog;
+DROP TABLE IF EXISTS copy_fengmo;
+DROP TABLE IF EXISTS copy_friend;
+DROP TABLE IF EXISTS copy_general;
+DROP TABLE IF EXISTS copy_human_ext;
+DROP TABLE IF EXISTS copy_human_ext2;
+DROP TABLE IF EXISTS copy_mail;
+DROP TABLE IF EXISTS copy_quest;
+DROP TABLE IF EXISTS copy_rep_special;
+DROP TABLE IF EXISTS copy_rep_turn_around ;
+DROP TABLE IF EXISTS copy_shopexchange;
+DROP TABLE IF EXISTS copy_tower;
+
+
+-- 插入单独的，被删除的数据
+--
+--
+-- 查找各个表格指定id的数据
+SELECT id,NAME,account,LEVEL,human.`GuideClose`,human.`TimeLogin`,human.`TimeCreate`,human.`TimeLogout` FROM human WHERE account LIKE "%74720yijie_ios%";-- 角色信息 贺兰凤  100080000241000003
+SELECT id,NAME,account,LEVEL,human.`GuideClose`,human.`TimeLogin`,human.`TimeCreate`,human.`TimeLogout` FROM human WHERE account LIKE "%55858yijie_ios%";-- 角色信息 许清河 100120000196000028 61级
+SELECT * FROM activity_humandata WHERE activity_humandata.`humanId` = "100120000196000028";
+SELECT * FROM instance WHERE instance.`humanId` = "100120000196000028";
+SELECT * FROM backlog WHERE backlog.`humanId` = "100120000196000028";
+SELECT * FROM fengmo WHERE fengmo.`ID` = "100120000196000028";
+SELECT * FROM friend WHERE friend.`id` = "100120000196000028";
+SELECT * FROM general WHERE general.`humanId` = "100120000196000028";
+SELECT * FROM human_ext WHERE human_ext.`id` = "100120000196000028";
+SELECT * FROM human_ext2 WHERE human_ext2.`id` = "100120000196000028";
+SELECT * FROM mail WHERE mail.`receiver` = "100120000196000028";
+SELECT * FROM quest WHERE quest.`id` = "100120000196000028";
+SELECT * FROM rep_special WHERE rep_special.`id` = "100120000196000028";
+SELECT * FROM rep_turn_around WHERE rep_turn_around.`humanId` = "100120000196000028";
+SELECT * FROM shopexchange WHERE shopexchange.`id` = "100120000196000028";
+SELECT * FROM tower WHERE tower.`id` = "100120000196000028";
+
+-- 需要手动修改其账号account
+-- 插入指定角色的数据
+INSERT INTO human SELECT * FROM `ty_ios12game`.`human` WHERE ty_ios12game.`human`.`Account` = '55858yijie_ios';-- 最终插入漏掉的数据  
+INSERT INTO activity_humandata (SELECT * FROM ty_ios12game.`activity_humandata` WHERE ty_ios12game.`activity_humandata`.`humanId` = "100120000196000028");
+INSERT INTO instance (SELECT * FROM ty_ios12game.`instance` WHERE ty_ios12game.`instance`.`humanid` = "100120000196000028");
+INSERT INTO backlog (SELECT * FROM ty_ios12game.`backlog` WHERE ty_ios12game.`backlog`.`humanid` = "100120000196000028");
+INSERT INTO fengmo (SELECT * FROM ty_ios12game.`fengmo` WHERE ty_ios12game.`fengmo`.`id` = "100120000196000028");
+INSERT INTO friend (SELECT * FROM ty_ios12game.`friend` WHERE ty_ios12game.`friend`.`id` = "100120000196000028");
+INSERT INTO general (SELECT * FROM ty_ios12game.`general` WHERE ty_ios12game.`general`.`humanid` = "100120000196000028");
+INSERT INTO human_ext (SELECT * FROM ty_ios12game.`human_ext` WHERE ty_ios12game.`human_ext`.`id` = "100120000196000028");
+INSERT INTO human_ext2 (SELECT * FROM ty_ios12game.`human_ext2` WHERE ty_ios12game.`human_ext2`.`id` = "100120000196000028");
+INSERT INTO mail (SELECT * FROM ty_ios12game.`mail` WHERE ty_ios12game.`mail`.`receiver` = "100120000196000028");
+INSERT INTO quest (SELECT * FROM ty_ios12game.`quest` WHERE ty_ios12game.`quest`.`id` = "100120000196000028");
+INSERT INTO rep_special (SELECT * FROM ty_ios12game.`rep_special` WHERE ty_ios12game.`rep_special`.`id` = "100120000196000028");
+INSERT INTO rep_turn_around (SELECT * FROM ty_ios12game.`rep_turn_around` WHERE ty_ios12game.`rep_turn_around`.`humanid` = "100120000196000028");
+INSERT INTO shopexchange (SELECT * FROM ty_ios12game.`shopexchange` WHERE ty_ios12game.`shopexchange`.`id` = "100120000196000028");
+INSERT INTO tower (SELECT * FROM ty_ios12game.`tower` WHERE ty_ios12game.`tower`.`id` = "100120000196000028");
+
+-- 需要手动修改其账号account
+-- 插入指定角色的数据
+-- 流程： 
+-- 1.把旧号从旧库中复制插入新库，注意，human的账号会和原来的重复
+-- 2.先把账号随便改个名字
+-- 3.等旧号都复制过来后，把要覆盖的新号的账号黏贴到旧号账号内，并且，删除新号！
+-- 4.结束
+
+-- 把 合服前20服 的 古风歌 300200000061000119 ow0h000Umq_z0IBavNXaioBmvaQD74620B09C2CD765 lv:63 转移到 合服后的服 9_20服 的账号 5E8DAF28E723009836BF9982283FF8DFD74620B09C2CD765
+
+-- 把 合服前 25_28 服 的 挥剑斩情 300280000091000377 ow0h006jmMEW9w21wlTIUv4Ox87MD74620B09C2CD765 lv:74 转移到 合服后的服 21_33 服 的账号 奔水怜梦 DC2A9215853FF426BFE3960D39EC936CD74620B09C2CD765
+
+-- 把 合服前30服 的 冷如冰 300300000046000007 	     ow0h006jmMEW9w21wlTIUv4Ox87MD74620B09C2CD765 lv:51 转移到 合服后的服 21_33 服 的账号 宗正嘉实 06575862DFE41FDE3631FB19851F18A8D74620B09C2CD765
+
+INSERT INTO human SELECT * 		 FROM ty_yyb30game.`human` 			WHERE ty_yyb30game.`human`.`Account` = 'ow0h006jmMEW9w21wlTIUv4Ox87MD74620B09C2CD765';-- 最终插入漏掉的数据  
+
+INSERT INTO activity_humandata (SELECT * FROM ty_yyb30game.`activity_humandata` 	WHERE ty_yyb30game.`activity_humandata`.`humanId` 	= "300300000046000007");
+INSERT INTO instance (SELECT *  	 FROM ty_yyb30game.`instance` 			WHERE ty_yyb30game.`instance`.`humanid` 		= "300300000046000007");
+INSERT INTO backlog (SELECT *   	 FROM ty_yyb30game.`backlog` 			WHERE ty_yyb30game.`backlog`.`humanid` 			= "300300000046000007");
+INSERT INTO fengmo (SELECT * 		 FROM ty_yyb30game.`fengmo` 			WHERE ty_yyb30game.`fengmo`.`id` 			= "300300000046000007");
+INSERT INTO friend (SELECT * 		 FROM ty_yyb30game.`friend` 			WHERE ty_yyb30game.`friend`.`id` 			= "300300000046000007");
+INSERT INTO general (SELECT * 		 FROM ty_yyb30game.`general` 			WHERE ty_yyb30game.`general`.`humanid` 			= "300300000046000007");
+INSERT INTO human_ext (SELECT * 	 FROM ty_yyb30game.`human_ext` 			WHERE ty_yyb30game.`human_ext`.`id` 			= "300300000046000007");
+INSERT INTO human_ext2 (SELECT * 	 FROM ty_yyb30game.`human_ext2` 		WHERE ty_yyb30game.`human_ext2`.`id` 			= "300300000046000007");
+INSERT INTO mail (SELECT * 		 FROM ty_yyb30game.`mail` 			WHERE ty_yyb30game.`mail`.`receiver` 			= "300300000046000007");
+INSERT INTO quest (SELECT * 		 FROM ty_yyb30game.`quest` 			WHERE ty_yyb30game.`quest`.`id` 			= "300300000046000007");
+INSERT INTO rep_special (SELECT * 	 FROM ty_yyb30game.`rep_special` 		WHERE ty_yyb30game.`rep_special`.`id` 			= "300300000046000007");
+INSERT INTO rep_turn_around (SELECT * 	 FROM ty_yyb30game.`rep_turn_around` 		WHERE ty_yyb30game.`rep_turn_around`.`humanid` 		= "300300000046000007");
+INSERT INTO shopexchange (SELECT * 	 FROM ty_yyb30game.`shopexchange` 		WHERE ty_yyb30game.`shopexchange`.`id` 			= "300300000046000007");
+INSERT INTO tower (SELECT * 		 FROM ty_yyb30game.`tower` 			WHERE ty_yyb30game.`tower`.`id` 			= "300300000046000007");
+
+-- 全部查询
+SELECT id,NAME,account,LEVEL,human.`TimeLogin`,human.`TimeLogout`,human.`GMPrivilege`,human.`GuideClose`,human.`ServerId`
+ FROM human ; -- 300280000091000377  ow0h006jmMEW9w21wlTIUv4Ox87MD74620B09C2CD765
+ 
+-- 名字查询
+SELECT id,NAME,account,LEVEL,human.`TimeLogin`,human.`TimeLogout`,human.`GMPrivilege`,human.`GuideClose`,human.`ServerId`
+ FROM human WHERE NAME LIKE "%冷如冰%"; -- 300280000091000377  ow0h006jmMEW9w21wlTIUv4Ox87MD74620B09C2CD765
+ 
+-- 账号查询
+SELECT id,NAME,account,LEVEL,human.`TimeLogin`,human.`TimeLogout`,human.`GMPrivilege`,human.`GuideClose`,human.`ServerId`
+ FROM human WHERE human.`Account` LIKE "%冷如冰%"; -- 300280000091000377  ow0h006jmMEW9w21wlTIUv4Ox87MD74620B09C2CD765
+ 
+ -- 账号查询
+SELECT id,NAME,account,LEVEL,human.`TimeLogin`,human.`TimeLogout`,human.`GMPrivilege`,human.`GuideClose`,human.`ServerId`
+ FROM human WHERE human.`id` = ''; -- 300280000091000377  ow0h006jmMEW9w21wlTIUv4Ox87MD74620B09C2CD765
+ 
+ 
+-- 查找 对比两个库，查找多余的信息
+SELECT  *  FROM  human  WHERE  NOT EXISTS (SELECT 1 FROM human_ext WHERE  human.`id` = human_ext.`id`)  LIMIT 10000 ;
+SELECT  *  FROM  human_ext  WHERE  NOT EXISTS (SELECT 1 FROM human WHERE  human_ext.`id` = human.`id`)  LIMIT 10000 ;
+
+// 两个表关联查询;
+SELECT human.`id`,human.`Level`,general.* FROM general,human WHERE human.`id` = general.`HumanId` AND human.`Level`<7 AND human.`Level`>5;
+
+
