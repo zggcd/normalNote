@@ -35,3 +35,11 @@ java -cp ./javadecode family.me.helloworld ------>在当前文件夹下，进入javadecode
 javac helloworld.java -d C:\Users\Administrator\Documents\javadecode
 ::如果不指定生成的class的路径，那么将不会生成包结构。指定了路径就能生成包结构
 javac helloworld.java -d C:\Users\Administrator\Documents\javadecode
+
+## 使用bat文件运行一个 .jar包中指定的 main类
+::java -cp 环境变量 main路径 args参数1，args参数2,...........
+::第三方引入包 在libs文件夹里
+:: 以下两种方法都可以
+java -cp ./*; Chapter17_NetWork.AIOClient
+::java -jar SocketClient.jar
+pause
